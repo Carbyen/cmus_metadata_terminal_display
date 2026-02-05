@@ -79,10 +79,9 @@ def get_album_cover(file_path):
     album_path = os.path.dirname(file_path)
     if not os.path.isdir(album_path):
         return None
-
     try:
         for item in os.listdir(album_path):
-            if item.lower().endswith(('.png','.jpg','.jpeg')):
+            if item.lower().startswith(('cover.')):
                 return os.path.join(album_path, item)
     except FileNotFoundError:
         return None
@@ -110,10 +109,7 @@ def main(file_path):
     print(f'{"Artist":15}: {meta.get("Artist")}')
     print(f'{"Date":15}: {meta.get("Date")}')
     print(f'{"Duration":15}: {meta.get("Duration")}')
-    print(
-        f'{"Track position":15}: '
-        f'{meta.get("Track position")}/{meta.get("Track total")}'
-    )
+    print(f'{"Track position":15}: 'f'{meta.get("Track position")}/{meta.get("Track total")}')
     print()
     console.rule(characters='=', style="white")
     print()
@@ -132,7 +128,7 @@ def main(file_path):
             subprocess.run([
                 'chafa',
                 '--align=center',
-                '--size=40x40',
+                f'--size={album_cover_size}x{album_cover_size}',
                 album_cover_path
             ])
         except Exception:
@@ -141,10 +137,11 @@ def main(file_path):
         console.print("[yellow]Could not find album cover...[/]")
 
 
-last_file = None
+# ================================================================
 
-# Adjust font size depending on window size
-subprocess.run(['kitty', '@', 'set-font-size', '12'], stderr=subprocess.DEVNULL)
+
+last_file = None
+album_cover_size = "40" # Height & width of album cover (square)
 
 while True:
     try:
@@ -154,12 +151,10 @@ while True:
             sys.stdout.write("\033[2J\033[H")
             sys.stdout.flush()
             console.print(error)
-
         elif file_path and os.path.isfile(file_path):
             if file_path != last_file:
                 last_file = file_path
                 main(file_path)
-
         else:
             sys.stdout.write("\033[2J\033[H")
             sys.stdout.flush()
